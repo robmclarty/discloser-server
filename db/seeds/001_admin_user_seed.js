@@ -12,7 +12,8 @@ exports.seed = (knex, Promise) => knex(User.tableName).del()
     {
       username: 'admin',
       password: 'password',
-      email: 'admin@email.com'
+      email: 'admin@email.com',
+      'is_admin': true
     },
     {
       username: 'rob',

@@ -2,4 +2,11 @@
 
 'use strict'
 
-const PORT = process.env.PORT ||
+const config = require('../config/server')
+const app = require('../server')
+
+app.listen(config.port, () => {
+  console.log(`Server started on port ${ config.port }`)
+}).on('error', err => {
+  console.log('ERROR: ', err)
+})

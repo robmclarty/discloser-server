@@ -9,7 +9,7 @@ const {
   deleteMessage
 } = require('../controllers/message_controller')
 
-router.route('/users/:id/messages')
+router.route('/messages')
   .post(postMessages)
   .get(getMessages)
 

@@ -10,7 +10,9 @@
     "deploy": "./bin/deploy.sh --username ubuntu --name discolser --tag robmclarty/discloser:latest --host discloser --file docker-compose.yml",
     "db:migrate:make": "npx knex migrate:make",
     "db:migrate": "npx knex migrate:latest",
-    "db:migrate:rollback": "npx knex migrate:rollback"
+    "db:migrate:rollback": "npx knex migrate:rollback",
+    "db:seed": "npx knex seed:run",
+    "db:seed:make": "npx knex seed:make"
   },
   "repository": {
     "type": "git",

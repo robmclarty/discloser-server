@@ -17,10 +17,13 @@ module.exports = ({
   const create = props => {
     delete props.id // not allowed to set `id`
 
-    return knex.insert(props)
-      .returning(selectableProps)
-      .into(tableName)
-      .timeout(timeout)
+    return Promise.resolve()
+      .then(() => knex.insert(props)
+        .returning(selectableProps)
+        .into(tableName)
+        .timeout(timeout)
+      )
+      .then(res => res[0])
   }
 
   const findAll = () => knex.select(selectableProps)
