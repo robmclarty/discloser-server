@@ -26,7 +26,7 @@ const postMessages = async (req, res, next) => {
 }
 
 const getMessages = async (req, res, next) => {
-  const userId = req.parmas.user_id
+  //const userId = req.parmas.user_id
 
   try {
     const messages = await Message.findAll()
@@ -34,8 +34,7 @@ const getMessages = async (req, res, next) => {
     res.json({
       ok: true,
       message: 'Messages found',
-      messages,
-      userId
+      messages
     })
   } catch (err) {
     next(err)
