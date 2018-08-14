@@ -4,7 +4,10 @@
   "description": "Cloud API for accepting encrypted messages from Discloser.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "./bin/start-env.sh --file ./config/app.dev.env",
+    "dockerize": "./bin/dockerize.sh",
+    "deploy": "./bin/deploy.sh --username ubuntu --name discolser --tag robmclarty/discloser:latest --host discloser --file docker-compose.yml",
   },
   "repository": {
     "type": "git",
@@ -15,5 +18,16 @@
   "bugs": {
     "url": "https://github.com/robmclarty/discloser/issues"
   },
-  "homepage": "https://github.com/robmclarty/discloser#readme"
+  "homepage": "https://github.com/robmclarty/discloser#readme",
+  "dependencies": {
+    "bcrypt": "^3.0.0",
+    "body-parser": "^1.18.3",
+    "cors": "^2.8.4",
+    "cred": "^0.5.10",
+    "crypto-butter": "0.0.1",
+    "express": "^4.16.3",
+    "js-logger": "^1.4.1",
+    "knex": "^0.15.2",
+    "pg": "^7.4.3"
+  }
 }
