@@ -8,6 +8,9 @@
     "start": "./bin/start-env.sh --file ./config/app.dev.env",
     "dockerize": "./bin/dockerize.sh",
     "deploy": "./bin/deploy.sh --username ubuntu --name discolser --tag robmclarty/discloser:latest --host discloser --file docker-compose.yml",
+    "db:migrate:make": "npx knex migrate:make",
+    "db:migrate": "npx knex migrate:latest",
+    "db:migrate:rollback": "npx knex migrate:rollback"
   },
   "repository": {
     "type": "git",
