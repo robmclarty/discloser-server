@@ -2,6 +2,7 @@
 
 module.exports = {
   port: process.env.PORT,
+  name: process.env.APP_NAME,
   issuer: process.env.ISSUER,
   origin: process.env.ORIGIN,
   cred: {

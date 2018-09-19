@@ -13,7 +13,8 @@ die() {
 }
 
 # Initialize variables
-file="./config/app.dev.env"
+file="./config/env/app.dev.env"
+command="./server/start.js" # Main app
 
 while :; do
   case $1 in
@@ -27,6 +28,14 @@ while :; do
         shift
       else
         die 'ERROR: "--file" requires a non-empty option argument.'
+      fi
+      ;;
+    -c|--command) # Takes an option argument; ensure it has been specified.
+      if [ "$2" ]; then
+        file=$2
+        shift
+      else
+        die 'ERROR: "--command" requires a non-empty option argument.'
       fi
       ;;
     --) # End of all options.
@@ -46,4 +55,4 @@ done
 # Launch node server by first initializing all env vars with definitions found
 # in ./config/config.env file in order to separate them from codebase.
 # Ref: https://stackoverflow.com/questions/19331497/set-environment-variables-from-file
-export $(cat $file | xargs) && ./server/start.js
+export $(cat $file | xargs) && $command

@@ -1,19 +1,23 @@
 'use strict'
 
-const router = require('express').Router()
+const express = require('express')
+const router = express.Router()
+const cred = require('../cred')
 const {
-  login,
-  logout,
-  register,
-  refreshTokens
+  postAuth,
+  refreshAuth,
+  deleteAuth,
+  postRegister
 } = require('../controllers/auth_controller')
 
 router.route('/auth')
-  .post(login)
-  .put(refreshTokens)
-  .delete(logout)
+  .post(cred.authenticate('basic'), postAuth)
+  .delete(cred.requireRefreshToken, deleteAuth)
+
+router.route('/auth/refresh')
+  .post(cred.requireRefreshToken, refreshAuth)
 
 router.route('/register')
-  .post(register)
+  .post(postRegister)
 
 module.exports = router

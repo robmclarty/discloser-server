@@ -13,7 +13,7 @@ exports.seed = (knex, Promise) => knex(User.tableName).del()
       username: 'admin',
       password: 'password',
       email: 'admin@email.com',
-      'is_admin': true
+      'isAdmin': true
     },
     {
       username: 'rob',
@@ -21,5 +21,5 @@ exports.seed = (knex, Promise) => knex(User.tableName).del()
       email: 'rob@email.com'
     }
   ])
-  .then(newUsers => Promise.all(newUsers.map(user => User.create(user))))
+  .then(newUsers => Promise.all(newUsers.map(user => User.forceCreate(user))))
   .catch(err => console.log('err: ', err))

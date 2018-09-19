@@ -1,62 +1,103 @@
 'use strict'
 
-const User = require('../models/user')
 const {
   createError,
-  BAD_REQUEST,
-  UNAUTHORIZED
+  UNAUTHORIZED,
+  FORBIDDEN,
+  BAD_REQUEST
 } = require('../helpers/error_helper')
+const cred = require('../cred')
 
-const login = (req, res, next) => {
-  const username = String(req.body.username)
-  const password = String(req.body.password)
-
-  if (!username || !password) next(createError({
-    status: BAD_REQUEST,
-    message: '`username` + `password` are required fields'
+// If `req.cred` or `req.cred.tokens` are not present, it means that the cred
+// middleware failed to authenticate the user. See `/server/cred.js` for details.
+// Otherwise, if tokens were generated and attached to `req`, return them in
+// the response.
+const postAuth = (req, res, next) => {
+  if (!req.cred || !req.cred.tokens) return next(createError({
+    status: UNAUTHORIZED,
+    message: 'Authentication failed'
   }))
 
-  User.verify(username, password)
-    .then(user => res.json({
+  res.json({
+    ok: true,
+    message: 'Login successful',
+    tokens: req.cred.tokens
+  })
+}
+
+// Given a valid refresh token in the Authorization header, return a new set of
+// access + refresh tokens with updated expiration dates.
+const refreshAuth = async (req, res, next) => {
+  try {
+    const freshTokens = await cred.refresh(req.cred.token)
+
+    res.json({
       ok: true,
-      message: 'Login successful',
-      user
-    }))
-    .catch(err => next(createError({
+      message: 'Tokens refreshed',
+      tokens: freshTokens
+    })
+  } catch (err) {
+    next(createError({
       status: UNAUTHORIZED,
       message: err
-    })))
+    }))
+  }
 }
 
-const logout = (req, res, next) => {
-}
+// Revoke the authenticated token provided in the Authorization header,
+// effectively "logging out".
+// Alternatively, if a `token` attribute is provided in the body, on top of the
+// token used in the Authorization header, revoke that token instead. This
+// action is only allowed by admin users (having the `isAdmin` property of
+// their token payload set to `true`.
+const deleteAuth = async (req, res, next) => {
+  try {
+    const revokedToken = await cred.revoke(req.cred.token)
 
-const register = (req, res, next) => {
-  const props = req.body.user
-
-  User.findOne({ username: props.username })
-    .then(user => {
-      if (user) return next(createError({
-        status: CONFLICT,
-        message: 'Username already exists'
-      }))
-
-      return User.create(props)
+    res.json({
+      ok: true,
+      message: 'Logged out',
+      revokedToken
     })
-    .then(user => res.json({
+  } catch (err) {
+    next(createError({
+      ok: false,
+      status: UNAUTHORIZED,
+      message: err
+    }))
+  }
+}
+
+// Create a new user.
+const postRegister = async (req, res, next) => {
+  if (!req.body.user) return next(createError({
+    status: BAD_REQUEST,
+    message: '`user` is required'
+  }))
+
+  try {
+    // Create a new user that is guaranteed not to be an admin.
+    const user = await User.create({
+      ...req.body.user,
+      isAdmin: false
+    })
+
+    res.json({
       ok: true,
       message: 'Registration successful',
       user
+    })
+  } catch (err) {
+    next(createError({
+      status: BAD_REQUEST,
+      message: err
     }))
-    .catch(next)
-}
-
-const refreshTokens = (req, res, next) => {
+  }
 }
 
 module.exports = {
-  login,
-  logout,
-  register,
-  refreshTokens
+  postAuth,
+  refreshAuth,
+  deleteAuth,
+  postRegister
 }

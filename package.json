@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "./bin/envify.sh --file ./config/app.dev.env",
+    "start": "./bin/envify.sh -f ./config/app.dev.env -c ./server/start.js",
     "dockerize": "./bin/dockerize.sh",
     "deploy": "./bin/deploy.sh --username ubuntu --name discolser --tag robmclarty/discloser:latest --host discloser --file docker-compose.yml",
     "db:migrate:make": "npx knex migrate:make",

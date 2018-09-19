@@ -1,72 +1,138 @@
 'use strict'
 
-const bcrypt = require('bcrypt')
-const createGuts = require('../helpers/model_guts')
-
-const name = 'User'
-const tableName = 'users'
+const TABLE_NAME = 'users'
+const SALT_ROUNDS = 10 // how many rounds used for password hash salt
 
 // Properties that are allowed to be selected from the database for reading.
 // (e.g., `password` is not included and thus cannot be selected)
-const selectableProps = [
+const SELECTABLE_FIELDS = [
   'id',
   'username',
   'email',
-  'updated_at',
-  'created_at'
+  'isActive',
+  'isAdmin',
+  'loginAt',
+  'updatedAt',
+  'createdAt'
 ]
 
+// Properties that are allowed to be modified.
+const MUTABLE_FIELDS = [
+  'username',
+  'email',
+  'password',
+  'isActive'
+]
+
+const knex = require('../knex')
+const bcrypt = require('bcrypt')
+const validator = require('validator')
+const queries = require('../helpers/query_helper')(TABLE_NAME, SELECTABLE_FIELDS)
+
 // Bcrypt functions used for hashing password and later verifying it.
-const SALT_ROUNDS = 10
 const hashPassword = password => bcrypt.hash(password, SALT_ROUNDS)
 const verifyPassword = (password, hash) => bcrypt.compare(password, hash)
 
-// Always perform this logic before saving to db. This includes always hashing
-// the password field prior to writing so it is never saved in plain text.
-const beforeSave = user => {
-  if (!user.password) return Promise.resolve(user)
+// Remove all immutable fields
+const filter = (props, keys) => Object.keys(props).reduce((filteredProps, key) => {
+  if (keys.includes(key)) filteredProps[key] = props[key]
 
-  // `password` will always be hashed before being saved.
-  return hashPassword(user.password)
-    .then(hash => ({ ...user, password: hash }))
-    .catch(err => `Error hashing password: ${ err }`)
+  return filteredProps
+}, {})
+
+const sanitize = async props => {
+  let p = props
+
+  if (p.password) p.password = await hashPassword(p.password)
+  if (p.email) p.email = validator.normalizeEmail(p.email)
+
+  return p
 }
 
-module.exports = knex => {
-  const guts = createGuts({
-    knex,
-    name,
-    tableName,
-    selectableProps
-  })
+const validate = props => {
+  if (validator.isEmpty(props.username)) throw '`username` is required'
+  if (!validator.matches(props.username, /^[A-Za-z0-9\-_@.]+$/)) throw '`username` must be url-safe'
+  if (validator.isEmpty(props.email)) throw '`email` is required'
+  if (!validator.isEmail(props.email)) throw '`email` must be a valid email address'
 
-  // Augment default `create` function to include custom `beforeSave` logic.
-  const create = props => beforeSave(props)
-    .then(user => guts.create(user))
+  return props
+}
 
-  const verify = (username, password) => {
-    const matchErrorMsg = 'Username or password do not match'
+// Create users without filtering (e.g., for use by admins).
+const forceCreate = async props => {
+  const saneProps = await sanitize(props)
+  const validProps = validate(saneProps)
+  const user = await queries.create(validProps)
 
-    knex.select()
-      .from(tableName)
-      .where({ username })
-      .timeout(guts.timeout)
-      .then(user => {
-        if (!user) throw matchErrorMsg
+  return user
+}
 
-        return user
-      })
-      .then(user => Promise.all([user, verifyPassword(password, user.password)]))
-      .then(([user, isMatch]) => {
-        if (!isMatch) throw matchErrorMsg
+const create = async props => {
+  const filteredProps = filter(props, MUTABLE_FIELDS)
+  const saneProps = await sanitize(filteredProps)
+  const validProps = validate(saneProps)
+  const user = await queries.create(validProps)
 
-        return user
-      })
-  }
+  return user
+}
 
-  return {
-    ...guts,
-    create,
-    verify
-  }
+// Do not allow changing `password` through regular update function.
+// Do not allow changing of `id`.
+const update = async (id, props) => {
+  const filteredProps = filter(props, MUTABLE_FIELDS)
+  const saneProps = await sanitize(filteredProps)
+  const validProps = await validate(saneProps)
+  const user = await queries.udpate(id, validProps)
+
+  return user
+}
+
+// Don't filter props (e.g., for use by admins).
+const forceUpdate = async (id, props) => {
+  const saneProps = await sanitize(props)
+  const validProps = await validate(saneProps)
+  const user = await queries.udpate(id, validProps)
+
+  return user
+}
+
+const verify = async (username, password) => {
+  const verifyErrorMsg = 'Username or password do not match'
+
+  const user = await knex.first([
+    ...SELECTABLE_FIELDS,
+    'password'
+  ])
+    .from(TABLE_NAME)
+    .where({ username })
+
+  // Respond with same error message regardless of reason to provide attackers
+  // with no additional information.
+  // User must exist, have a verified password, and be active to be consdiered
+  // authentic.
+  if (!user || !user.isActive) throw verifyErrorMsg
+
+  const isMatch = await verifyPassword(password, user.password)
+
+  if (!isMatch) throw verifyErrorMsg
+
+  // Don't include `password` in returned object.
+  delete user.password
+
+  return user
+}
+
+const loginUpdate = async id => queries.update(id, {
+  loginAt: knex.fn.now()
+})
+
+module.exports = {
+  tableName: TABLE_NAME,
+  fields: SELECTABLE_FIELDS,
+  ...queries,
+  forceCreate,
+  create, // override queries.create
+  update, // override queries.update
+  verify,
+  loginUpdate
 }
