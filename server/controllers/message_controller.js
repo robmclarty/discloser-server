@@ -17,8 +17,8 @@ const postMessages = async (req, res, next) => {
     res.json({
       ok: true,
       message: 'Message created',
-      userId: message.user_id,
-      createdAt: message.created_at
+      userId: message.userId,
+      createdAt: message.createdAt
     })
   } catch (err) {
     next(err)
@@ -48,7 +48,7 @@ const getMessage = (req, res, next) => {
     .then(message => res.json({
       ok: true,
       message: 'Message found',
-      message
+      msg
     }))
     .catch(next)
 }
@@ -61,7 +61,7 @@ const putMessage = (req, res, next) => {
     .then(message => res.json({
       ok: true,
       message: 'Message updated',
-      message
+      msg
     }))
     .catch(next)
 }
