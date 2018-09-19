@@ -1,9 +1,13 @@
 'use strict'
 
+const {
+  createError,
+  NOT_FOUND
+} = require('../helpers/error_helper')
 const Message = require('../models/message')
 
 const postMessages = async (req, res, next) => {
-  const userId = req.body.userId
+  const userId = req.params.user_id
   const data = req.body.data
   const mac = req.body.mac
 
@@ -26,10 +30,10 @@ const postMessages = async (req, res, next) => {
 }
 
 const getMessages = async (req, res, next) => {
-  //const userId = req.parmas.user_id
+  const userId = req.parmas.user_id
 
   try {
-    const messages = await Message.findAll()
+    const messages = await Message.find({ userId })
 
     res.json({
       ok: true,
@@ -42,46 +46,84 @@ const getMessages = async (req, res, next) => {
 }
 
 const getMessage = (req, res, next) => {
+  const userId = req.params.user_id
   const messageId = req.params.id
 
-  Message.findById(messageId)
-    .then(message => res.json({
+  try {
+    const msg = await Message.find({
+      id: messageId,
+      userId
+    })
+
+    res.json({
       ok: true,
       message: 'Message found',
       msg
-    }))
-    .catch(next)
+    })
+  } catch (err) {
+    next(err)
+  }
 }
 
-const putMessage = (req, res, next) => {
+const patchMessage = (req, res, next) => {
+  const userId = req.params.user_id
   const messageId = req.params.id
   const props = req.body.message
 
-  Message.update(messageId, props)
-    .then(message => res.json({
+  try {
+    const msg = await Message.find({
+      id: messageId,
+      userId
+    })
+
+    if (!msg) throw createError({
+      status: NOT_FOUND,
+      message: `No message found with userId '${ userId }' and id '${ messageId }'`
+    })
+
+    const updatedMsg = await Message.update(messageId, props)
+
+    res.json({
       ok: true,
       message: 'Message updated',
-      msg
-    }))
-    .catch(next)
+      msg: updatedMsg
+    })
+  } catch (err) {
+    next(err)
+  }
 }
 
 const deleteMessage = (req, res, next) => {
+  const userId = req.params.user_id
   const messageId = req.params.id
 
-  Message.destroy(messageId)
-    .then(deleteCount => res.json({
+  try {
+    const msg = await Message.find({
+      id: messageId,
+      userId
+    })
+
+    if (!msg) throw createError({
+      status: NOT_FOUND,
+      message: `No message found with userId '${ userId }' and id '${ messageId }'`
+    })
+
+    const deleteCount = await Message.destroy(messageId)
+
+    res.json({
       ok: true,
       message: 'Message deleted',
       deleteCount
-    }))
-    .catch(next)
+    })
+  } catch (err) {
+    next(err)
+  }
 }
 
 module.exports = {
   postMessages,
   getMessages,
   getMessage,
-  putMessage,
+  patchMessage,
   deleteMessage
 }
