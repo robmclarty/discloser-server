@@ -141,7 +141,7 @@ const deleteKey = async (req, res, next) => {
   }
 }
 
-modules.export = {
+module.exports = {
   postKeys,
   getKeys,
   getKey,

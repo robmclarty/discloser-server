@@ -45,7 +45,7 @@ const getMessages = async (req, res, next) => {
   }
 }
 
-const getMessage = (req, res, next) => {
+const getMessage = async (req, res, next) => {
   const userId = req.params.user_id
   const messageId = req.params.id
 
@@ -65,7 +65,7 @@ const getMessage = (req, res, next) => {
   }
 }
 
-const patchMessage = (req, res, next) => {
+const patchMessage = async (req, res, next) => {
   const userId = req.params.user_id
   const messageId = req.params.id
   const props = req.body.message
@@ -93,7 +93,7 @@ const patchMessage = (req, res, next) => {
   }
 }
 
-const deleteMessage = (req, res, next) => {
+const deleteMessage = async (req, res, next) => {
   const userId = req.params.user_id
   const messageId = req.params.id
 

@@ -18,7 +18,7 @@ router.route('/users/:user_id/messages')
 router.route('/users/:user_id/messages/:id')
   .all(requireOwner)
   .get(getMessage)
-  .patch(putMessage)
+  .patch(patchMessage)
   .delete(deleteMessage)
 
 module.exports = router

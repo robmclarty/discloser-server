@@ -5,7 +5,7 @@
 # http://mywiki.wooledge.org/BashFAQ/035
 
 # Vars:
-# -f --file - config file (`./config/app.dev.env` by default)
+# -f --file - config file (`./config/env/app.dev.env` by default)
 
 die() {
   printf '%s\n' "$1" >&2
@@ -32,7 +32,7 @@ while :; do
       ;;
     -c|--command) # Takes an option argument; ensure it has been specified.
       if [ "$2" ]; then
-        file=$2
+        command=$2
         shift
       else
         die 'ERROR: "--command" requires a non-empty option argument.'
