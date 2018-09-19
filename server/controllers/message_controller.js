@@ -1,6 +1,6 @@
 'use strict'
 
-const { Message, User } = require('../models')
+const Message = require('../models/message')
 
 const postMessages = async (req, res, next) => {
   const userId = req.body.userId
@@ -9,7 +9,7 @@ const postMessages = async (req, res, next) => {
 
   try {
     const message = await Message.create({
-      user_id: userId,
+      userId,
       data,
       mac
     })

@@ -1,6 +1,6 @@
 'use strict'
 
-const { User } = require('../models')
+const User = require('../models/user')
 
 const postUsers = (req, res, next) => {
   const props = req.body.user

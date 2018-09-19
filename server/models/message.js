@@ -1,28 +1,21 @@
 'use strict'
 
-const createGuts = require('../helpers/model_guts')
+const TABLE_NAME = 'messages'
 
-const name = 'Message'
-const tableName = 'messages'
-
-const selectableProps = [
+const SELECTABLE_FIELDS = [
   'id',
-  'user_id',
+  'userId',
   'data',
   'mac',
-  'updated_at',
-  'created_at'
+  'createdAt',
+  'updatedAt'
 ]
 
-module.exports = knex => {
-  const guts = createGuts({
-    knex,
-    name,
-    tableName,
-    selectableProps
-  })
+const knex = require('../knex')
+const queries = require('../helpers/query_helper')(TABLE_NAME, SELECTABLE_FIELDS)
 
-  return {
-    ...guts
-  }
+module.exports = {
+  tableName: TABLE_NAME,
+  fields: SELECTABLE_FIELDS,
+  ...queries
 }
