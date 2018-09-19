@@ -50,7 +50,7 @@ const getMessage = (req, res, next) => {
   const messageId = req.params.id
 
   try {
-    const msg = await Message.find({
+    const msg = await Message.findOne({
       id: messageId,
       userId
     })
@@ -71,7 +71,7 @@ const patchMessage = (req, res, next) => {
   const props = req.body.message
 
   try {
-    const msg = await Message.find({
+    const msg = await Message.findOne({
       id: messageId,
       userId
     })
@@ -98,7 +98,7 @@ const deleteMessage = (req, res, next) => {
   const messageId = req.params.id
 
   try {
-    const msg = await Message.find({
+    const msg = await Message.findOne({
       id: messageId,
       userId
     })

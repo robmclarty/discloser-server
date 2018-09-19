@@ -11,7 +11,6 @@ const SELECTABLE_FIELDS = [
   'updatedAt'
 ]
 
-const knex = require('../knex')
 const queries = require('../helpers/query_helper')(TABLE_NAME, SELECTABLE_FIELDS)
 
 module.exports = {
