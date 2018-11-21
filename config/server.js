@@ -1,5 +1,6 @@
 'use strict'
 
+// Map flat env vars to more organized js object.
 module.exports = {
   port: process.env.PORT,
   name: process.env.APP_NAME,

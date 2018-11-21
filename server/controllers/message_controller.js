@@ -7,11 +7,10 @@ const {
 const Message = require('../models/message')
 
 const postMessages = async (req, res, next) => {
-  const userId = req.params.user_id
-  const data = req.body.data
-  const mac = req.body.mac
-
   try {
+    const userId = req.params.user_id
+    const data = req.body.data
+    const mac = req.body.mac
     const message = await Message.create({
       userId,
       data,
@@ -30,9 +29,8 @@ const postMessages = async (req, res, next) => {
 }
 
 const getMessages = async (req, res, next) => {
-  const userId = req.parmas.user_id
-
   try {
+    const userId = req.params.user_id
     const messages = await Message.find({ userId })
 
     res.json({

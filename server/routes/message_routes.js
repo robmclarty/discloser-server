@@ -11,12 +11,12 @@ const {
 } = require('../controllers/message_controller')
 
 router.route('/users/:user_id/messages')
-  .all(requireOwner)
+  //.all(requireOwner)
   .post(postMessages)
   .get(getMessages)
 
 router.route('/users/:user_id/messages/:id')
-  .all(requireOwner)
+  //.all(requireOwner)
   .get(getMessage)
   .patch(patchMessage)
   .delete(deleteMessage)
