@@ -1,6 +1,6 @@
 {
   "name": "discloser-server",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Cloud API for accepting encrypted messages from Discloser.",
   "main": "server/index.js",
   "scripts": {
